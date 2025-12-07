@@ -2,7 +2,9 @@ services:
   - type: web
     name: smtp-telegram-bot
     env: python
-    buildCommand: ./build.sh
+    buildCommand: |
+      echo "python-3.10.13" > runtime.txt
+      pip install -r requirements.txt
     startCommand: python main.py
     envVars:
       - key: BOT_TOKEN
