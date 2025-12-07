@@ -1,19 +1,19 @@
 import re
 import smtplib
 import dns.resolver
+import os
+import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums import ParseMode
 from aiogram.types import Message
-from aiogram.utils import executor
-import os
 
-# 👇 استبدل هذا بالتوكن حق بوتك من BotFather
-API_TOKEN = os.getenv("8525848016:AAF8yTVahsO2wjO-Lj84Zx5i0d_yrMQHG54")
+# 🔹 ضع التوكن هنا أو ضعه في متغير بيئة BOT_TOKEN في Render
+API_TOKEN = os.getenv("BOT_TOKEN", "8525848016:AAF8yTVahsO2wjO-Lj84Zx5i0d_yrMQHG54")
 
 bot = Bot(token=API_TOKEN, parse_mode=ParseMode.HTML)
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
-# التحقق من الصيغة
+# التحقق من صيغة الايميل
 def is_valid_format(email):
     pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
     return re.match(pattern, email)
@@ -26,7 +26,7 @@ def get_mx(domain):
     except:
         return None
 
-# فحص SMTP
+# SMTP Check
 def smtp_check(email):
     if not is_valid_format(email):
         return "❌ صيغة الإيميل غير صحيحة."
@@ -51,13 +51,16 @@ def smtp_check(email):
     except Exception as e:
         return f"🚫 خطأ أثناء الاتصال: {e}"
 
-# لما المستخدم يرسل أي رسالة
-@dp.message_handler()
+# استقبال الرسائل
+@dp.message()
 async def handle_message(message: Message):
     email = message.text.strip()
     result = smtp_check(email)
     await message.reply(f"📧 <b>{email}</b>\n\n{result}")
 
-# تشغيل البوت
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+# تشغيل البوت (بديل executor)
+async def main():
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
